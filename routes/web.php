@@ -19,8 +19,17 @@ $router->get('/', function () use ($router) {
 });
 
 $router->group(['prefix'=>'api'], function() use ($router) {
-    $router->get('/posts', 'PostController@index');
-    $router->post('/posts', 'PostController@store');
-    $router->put('/posts/{id}', 'PostController@update');
-    $router->delete('/posts/{id}', 'PostController@delete');
+    $router->post('/register', 'AuthController@register');
+    $router->post('/login', 'AuthController@login');
+
+    // We will put our posts route in a group which will check auth middleware so that user will have to
+    // login to access post CRUD operations.
+    $router->group(['middleware' => 'auth'], function () use ($router) {
+        $router->post('/api/logout', 'AuthController@logout');
+        $router->get('/posts', 'PostController@index');
+        $router->post('/posts', 'PostController@store');
+        $router->put('/posts/{id}', 'PostController@update');
+        $router->delete('/posts/{id}', 'PostController@delete');
+    });
+
 });

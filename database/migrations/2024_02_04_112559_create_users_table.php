@@ -2,29 +2,33 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateUsersTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->string('password');
+            $table->string('name', 255)->nullable(false);
+            $table->string('email', 100)->nullable(false);
+            $table->string('phone', 100)->nullable(false);
+            $table->date('date_of_birth');
+            $table->integer('status');
+            $table->integer('user_type_id');
+            $table->integer('category_id');
+            $table->integer('is_deleted');
+            $table->integer('consent');
             $table->timestamps();
         });
+
+        // Set default value for date_of_birth column
+        DB::statement("ALTER TABLE users MODIFY date_of_birth DATETIME DEFAULT NOW()");
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('users');
     }
-};
+}

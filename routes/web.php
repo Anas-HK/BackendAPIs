@@ -32,4 +32,7 @@ $router->group(['prefix'=>'api'], function() use ($router) {
         $router->delete('/posts/{id}', 'PostController@delete');
     });
 
+    // Taking apis outside for testing
+
+
 });

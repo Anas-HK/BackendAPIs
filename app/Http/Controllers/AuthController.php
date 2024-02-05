@@ -15,19 +15,19 @@ class AuthController extends Controller
         $password = $request->password;
 
         // Check if fields are not empty
-        if(empty($email) || empty($password)) {
-            return response()->json(['status' => 'error', 'message' => 'You must fill all fields']);
-        }
+//        if(empty($email) || empty($password)) {
+//            return response()->json(['status' => 'error', 'message' => 'You must fill all fields']);
+//        }
 
         $client = new Client();
         try {
             $response = $client->post(config('service.passport.login_endpoint'), [
                 "form_params" => [
                     "client_secret" => config('service.passport.client_secret'),
-                    "grant_type" => "password",
+                    "grant_type" => "username",
                     "client_id" => config('service.passport.client_id'),
                     "username" => $request->email,
-                    "password" => $request->password
+//                    "password" => $request->password
                 ]
             ]);
 
@@ -35,7 +35,7 @@ class AuthController extends Controller
             return $response->getBody()->getContents();
         } catch (RequestException $e) {
             // Handle request exceptions (e.g., connection errors)
-            return response()->json(['status'=> 'error', 'message' => $e->getMessage()]);
+            return response()->json(['status'=> 'error', 'message' => 'your error' .  $e->getMessage()]);
         } catch (\Exception $e) {
             // Handle other exceptions
             return response()->json(['status'=> 'error', 'message' => $e->getMessage()]);
@@ -45,10 +45,19 @@ class AuthController extends Controller
     public function register(Request $request) {
         $name = $request->name;
         $email = $request->email;
-        $password = $request->password;
-
+//        $password = $request->password;
+        $phone = $request->phone;
+        $date_of_birth = $request->date_of_birth;
+        $status = $request->status;
+        $user_type_id = $request->user_type_id;
+        $category_id = $request->category_id;
+        $is_deleted = $request->is_deleted;
+        $consent = $request->consent;
         // Check if fields are not empty
-        if(empty($email) || empty($password) || empty($name)) {
+//        if(empty($email) || empty($password) || empty($name)) {
+//            return response()->json(['status' => 'error', 'message' => 'You must fill all fields']);
+//        }
+        if(empty($email) ||  empty($name)) {
             return response()->json(['status' => 'error', 'message' => 'You must fill all fields']);
         }
 
@@ -58,9 +67,9 @@ class AuthController extends Controller
         }
 
         // Check if password is greater than 5 characters
-        if(strlen($password) < 5) {
-            return response()->json(['status' => 'error', 'message' => 'Password should be greater than 5 characters']);
-        }
+//        if(strlen($password) < 5) {
+//            return response()->json(['status' => 'error', 'message' => 'Password should be greater than 5 characters']);
+//        }
 
         // Check if user already exists
         if(User::where('email', '=', $email)->exists()) {
@@ -72,7 +81,15 @@ class AuthController extends Controller
             $user = new User;
             $user->name = $name;
             $user->email = $email;
-            $user->password = app('hash')->make($password);
+//            $user->password = app('hash')->make($password);
+
+            $user->phone = $phone;
+            $user->date_of_birth = $date_of_birth ;
+            $user->status = $status;
+            $user->user_type_id = $user_type_id;
+            $user->category_id = $category_id ;
+            $user->is_deleted = $is_deleted ;
+            $user->consent = $consent ;
 
             if($user->save()) {
                 // Will call login method after successful registration, so that we can get access token right after registration
@@ -80,7 +97,7 @@ class AuthController extends Controller
                 return $this->login($request);
             }
         } catch(\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+            return response()->json(['status' => 'error', 'message' => 'SQL error' .  $e->getMessage()]);
         }
     }
 

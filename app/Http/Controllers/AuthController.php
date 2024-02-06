@@ -24,10 +24,10 @@ class AuthController extends Controller
             $response = $client->post(config('service.passport.login_endpoint'), [
                 "form_params" => [
                     "client_secret" => config('service.passport.client_secret'),
-                    "grant_type" => "username",
+                    "grant_type" => "password",
                     "client_id" => config('service.passport.client_id'),
                     "username" => $request->email,
-//                    "password" => $request->password
+                    "password" => $request->password
                 ]
             ]);
 

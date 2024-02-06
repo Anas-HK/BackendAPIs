@@ -12,7 +12,8 @@ class CreateOtpsTable extends Migration
             $table->id();
             $table->string('code', 100)->nullable(false);
             $table->integer('status');
-            $table->timestamp('created_at')->nullable();
+            $table->integer('is_used');
+            $table->timestamp('created_at')->nullable(false);
         });
     }
 

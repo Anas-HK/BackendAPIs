@@ -12,7 +12,7 @@ class CreateUserTypesTable extends Migration
             $table->id();
             $table->string('name', 100)->nullable(false);
             $table->integer('status');
-            $table->integer('is_deleted');
+            $table->integer('is_deleted')->default(0);
             $table->timestamps();
         });
     }

@@ -9,6 +9,7 @@
         "dusterio/lumen-passport": "^0.3.8",
         "flipbox/lumen-generator": "^9.2",
         "guzzlehttp/guzzle": "^7.8",
+        "illuminate/mail": "^9.52",
         "laravel/lumen-framework": "^9.0",
         "laravel/passport": "^10.4"
     },

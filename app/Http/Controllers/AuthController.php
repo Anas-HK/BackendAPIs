@@ -42,11 +42,8 @@ class AuthController extends Controller
             return response()->json(['status' => 'failure', 'message' => 'User not found']);
         }
 
-        // Hash the raw password before verifying it
-        $hashedPassword = app('hash')->make($request->password);
-
         // Verify the password against the stored password hash
-        if (!app('hash')->check($hashedPassword, $user->password)) {
+        if (!app('hash')->check($password, $user->password)) {
             return response()->json(['status' => 'failure', 'message' => 'Invalid credentials']);
         }
 

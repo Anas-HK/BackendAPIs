@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\OtpVerification;
 use App\Models\Otp;
 use App\Models\User;
+use App\Models\UserTemp;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\RequestException;
@@ -24,11 +25,14 @@ class AuthController extends Controller
 
         // If validation fails, return error response
         if ($validator->fails()) {
-            return response()->json(['status' => 'failure', 'message' => $validator->errors()->first()]);
+            return response()->json(['status' => 'failure/error', 'message' => $validator->errors()->first()]);
         }
 
         $email = $request->email;
         $password = $request->password;
+
+//         Testing
+//         return response()->json(['status' => 'testing', 'message' => $email . " " . $password]);
 
         // Retrieve the user record from the database based on the provided email
         $user = User::where('email', $email)->first();
@@ -38,8 +42,11 @@ class AuthController extends Controller
             return response()->json(['status' => 'failure', 'message' => 'User not found']);
         }
 
+        // Hash the raw password before verifying it
+        $hashedPassword = app('hash')->make($request->password);
+
         // Verify the password against the stored password hash
-        if (!app('hash')->check($password, $user->password)) {
+        if (!app('hash')->check($hashedPassword, $user->password)) {
             return response()->json(['status' => 'failure', 'message' => 'Invalid credentials']);
         }
 
@@ -95,6 +102,13 @@ class AuthController extends Controller
         // Retrieve the email associated with the OTP
         $email = $otp->email;
 
+
+        // Retrieve the user data from the UserTemp table
+        $userTemp = UserTemp::where('email', $email)->first();
+
+        // Store the password before deleting the UserTemp object
+         $rawPassword = $userTemp->password;
+
         // Mark OTP as used
         $otp->is_used = 1;
         $otp->save();
@@ -102,20 +116,25 @@ class AuthController extends Controller
         // Proceed with the registration process
         try {
             $user = new User;
-            $user->name = $request->name;
-            $user->email = $email; // Use the retrieved email
-            $user->password = app('hash')->make($request->password);
-            $user->phone = $request->phone;
-            $user->date_of_birth = $request->date_of_birth;
-            $user->status = $request->status;
-            $user->user_type_id = $request->user_type_id;
-            $user->category_id = $request->category_id;
-            $user->is_deleted = $request->is_deleted;
-            $user->consent = $request->consent;
+            $user->name = $userTemp->name;
+            $user->email = $userTemp->email;
+            $user->password = app('hash')->make($rawPassword);
+            $user->phone = $userTemp->phone;
+            $user->date_of_birth = $userTemp->date_of_birth;
+            $user->status = $userTemp->status;
+            $user->user_type_id = $userTemp->user_type_id;
+            $user->category_id = $userTemp->category_id;
+            $user->is_deleted = $userTemp->is_deleted;
+            $user->consent = $userTemp->consent;
+
+            // Delete the user data from the UserTemp table
+            $userTemp->delete();
 
             if ($user->save()) {
+                // Add user data to the request
+                $request->merge(['user' => $user, 'email' => $user->email, 'password' => $rawPassword]);
+
                 // Proceed with the login process or return a success response
-//                return response()->json(['status' => 'success', 'message' => 'User registered successfully']);
                 return $this->login($request);
             }
         } catch (\Exception $e) {
@@ -151,8 +170,21 @@ class AuthController extends Controller
 
         $otpCode = $otp->code;
 
-        // Pass $otpCode to the view when sending the email
-//        Mail::to($request->email)->send(new OtpVerification($otpCode));
+        // Saving all data of user temporarily to access in verifyOTP function
+        $userTemp = new UserTemp;
+        $userTemp->name = $request->name;
+        $userTemp->email = $request->email;
+        $userTemp->password = $request->password;
+        $userTemp->phone = $request->phone;
+        $userTemp->date_of_birth = $request->date_of_birth;
+        $userTemp->status = $request->status;
+        $userTemp->user_type_id = $request->user_type_id;
+        $userTemp->category_id = $request->category_id;
+        $userTemp->is_deleted = $request->is_deleted;
+        $userTemp->consent = $request->consent;
+
+        $userTemp->save();
+
         try {
             Mail::to($request->email)->send(new \App\Mail\OtpVerification($otpCode));
             return response()->json(['status' => 'success', 'message' => 'OTP has been sent to your email']);
@@ -160,41 +192,6 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => 'failure', 'message' => $e->getMessage()]);
         }
-
-        // You need to implement email sending functionality here
-        // Send OTP to user's email
-        // Mail::to($request->email)->send(new OtpVerification($otp->code));
-
-        // After sending email, verifying the otp
-//        $otpVerificationResponse = $this->verifyOtp($request);
-//
-//        // Check OTP verification response
-//        if ($otpVerificationResponse['status'] !== 'success') {
-//            return response()->json($otpVerificationResponse);
-//        }
-
-        // Create new user
-//        try {
-//            $user = new User;
-//            $user->name = $request->name;
-//            $user->email = $request->email;
-//            $user->password = app('hash')->make($request->password);
-//            $user->phone = $request->phone;
-//            $user->date_of_birth = $request->date_of_birth;
-//            $user->status = $request->status;
-//            $user->user_type_id = $request->user_type_id;
-//            $user->category_id = $request->category_id;
-//            $user->is_deleted = $request->is_deleted;
-//            $user->consent = $request->consent;
-//
-//            if($user->save()) {
-//                // Will call login method after successful registration, so that we can get access token right after registration
-//                // The $request variable has all the registered data.
-//                return $this->login($request);
-//            }
-//        } catch(\Exception $e) {
-//            return response()->json(['status' => 'failure', 'message' => 'SQL error' .  $e->getMessage()]);
-//        }
     }
 
     // Will delete all associated tokens with the user

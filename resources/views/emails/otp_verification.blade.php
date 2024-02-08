@@ -1,14 +1,14 @@
 <?php
 ?>
 
+    <!DOCTYPE html>
 <html>
 <head>
     <title>OTP Verification</title>
 </head>
 <body>
-<p>Dear User,</p>
-<p>Your OTP code for verification is: <?php echo $otpCode; ?></p>
-<p>Regards,</p>
-<p>Your Application</p>
+<h1>Welcome to Our Website!</h1>
+<p>Your OTP code is: {{ $otpCode }}</p>
 </body>
 </html>
+

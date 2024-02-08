@@ -152,8 +152,15 @@ class AuthController extends Controller
         $otpCode = $otp->code;
 
         // Pass $otpCode to the view when sending the email
-        Mail::to($request->email)->send(new OtpVerification($otpCode));
-        return response()->json(['status' => 'success', 'message' => 'OTP has been sent to your email']);
+//        Mail::to($request->email)->send(new OtpVerification($otpCode));
+        try {
+            Mail::to($request->email)->send(new \App\Mail\OtpVerification($otpCode));
+            return response()->json(['status' => 'success', 'message' => 'OTP has been sent to your email']);
+
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'failure', 'message' => $e->getMessage()]);
+        }
+
         // You need to implement email sending functionality here
         // Send OTP to user's email
         // Mail::to($request->email)->send(new OtpVerification($otp->code));

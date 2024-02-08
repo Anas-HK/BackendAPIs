@@ -66,6 +66,12 @@ $app->singleton(
 $app->configure('auth');
 $app->configure('service');
 
+// For Mail
+$app->configure('mail');
+//
+//$app->alias('mail.manager', Illuminate\Mail\MailManager::class); $app->alias('mail.manager', Illuminate\Contracts\Mail\Factory::class);
+//
+//$app->alias('mailer', Illuminate\Mail\Mailer::class); $app->alias('mailer', Illuminate\Contracts\Mail\Mailer::class); $app->alias('mailer', Illuminate\Contracts\Mail\MailQueue::class);
 /*
 |--------------------------------------------------------------------------
 | Register Middleware
@@ -102,6 +108,12 @@ $app->configure('service');
 $app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
 $app->register(Laravel\Passport\PassportServiceProvider::class);
 $app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
+$app->register(Illuminate\Mail\MailServiceProvider::class);
+//$app->register(Symfony\Component\Mailer\Mailer::class);
+//$app->register(App\Providers\MailerServiceProvider::class);
+
+// Alias
+class_alias(Illuminate\Support\Facades\Mail::class, 'Mail');
 
 //Dusterio\LumenPassport\LumenPassport::routes($app);
 

@@ -11,7 +11,8 @@
         "guzzlehttp/guzzle": "^7.8",
         "illuminate/mail": "^9.52",
         "laravel/lumen-framework": "^9.0",
-        "laravel/passport": "^10.4"
+        "laravel/passport": "^10.4",
+        "symfony/mailer": "^6.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

@@ -12,6 +12,7 @@ use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -94,6 +95,15 @@ class AuthController extends Controller
 
         if (!$otp) {
             return response()->json(['status' => 'failure', 'message' => 'Invalid OTP']);
+        }
+
+        // Check if the OTP code has expired
+        $expirationTime = Carbon::now()->subMinutes(1);
+        if ($otp->created_at->lt($expirationTime)) {
+            // Mark OTP as expired
+            $otp->status = 0; // Assuming 0 means expired
+            $otp->save();
+            return response()->json(['status' => 'failure', 'message' => 'OTP code has expired. Please generate a new one.']);
         }
 
         // Retrieve the email associated with the OTP

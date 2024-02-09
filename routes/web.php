@@ -20,7 +20,8 @@ $router->get('/', function () use ($router) {
 
 $router->group(['prefix'=>'api'], function() use ($router) {
     $router->post('/verify-otp', 'AuthController@verifyOtp');
-    $router->post('/register', 'AuthController@register');
+    $router->post('/register/consumer', 'AuthController@registerConsumer');
+    $router->post('/register/business', 'AuthController@registerBusiness');
     $router->post('/login', 'AuthController@login');
 
     // We will put our posts route in a group which will check auth middleware so that user will have to

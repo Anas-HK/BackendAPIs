@@ -32,9 +32,6 @@ class AuthController extends Controller
         $email = $request->email;
         $password = $request->password;
 
-//         Testing
-//         return response()->json(['status' => 'testing', 'message' => $email . " " . $password]);
-
         // Retrieve the user record from the database based on the provided email
         $user = User::where('email', $email)->first();
 
@@ -101,7 +98,7 @@ class AuthController extends Controller
         $expirationTime = Carbon::now()->subMinutes(1);
         if ($otp->created_at->lt($expirationTime)) {
             // Mark OTP as expired
-            $otp->status = 0; // Assuming 0 means expired
+            $otp->status = 0; // 0 means expired
             $otp->save();
             return response()->json(['status' => 'failure', 'message' => 'OTP code has expired. Please generate a new one.']);
         }
@@ -149,8 +146,8 @@ class AuthController extends Controller
         }
     }
 
-    public function register(Request $request) {
-        // Validate the incoming request data
+    public function validateTheIncomingRequestData(Request $request): \Illuminate\Http\JsonResponse
+    {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255', // Maximum length of 255 characters
             'email' => 'required|email|max:100|unique:users', // Maximum length of 100 characters
@@ -199,6 +196,16 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => 'failure', 'message' => $e->getMessage()]);
         }
+    }
+
+    public function registerConsumer(Request $request) {
+        // Validate the incoming request data
+        return $this->validateTheIncomingRequestData($request);
+    }
+
+    public function registerBusiness(Request $request) {
+        // Validate the incoming request data
+        return $this->validateTheIncomingRequestData($request);
     }
 
     // Will delete all associated tokens with the user

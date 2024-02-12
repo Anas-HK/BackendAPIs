@@ -7,7 +7,6 @@ use App\Models\Otp;
 use App\Models\User;
 use App\Models\UserTemp;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -128,8 +127,10 @@ class AuthController extends Controller
             $user->status = $userTemp->status;
             $user->user_type_id = $userTemp->user_type_id;
             $user->category_id = $userTemp->category_id;
+            $user->business_id = $userTemp->business_id;
             $user->is_deleted = $userTemp->is_deleted;
             $user->consent = $userTemp->consent;
+            $user->push_notifications = $userTemp->push_notifications;
 
             // Delete the user data from the UserTemp table
             $userTemp->delete();
@@ -146,6 +147,16 @@ class AuthController extends Controller
         }
     }
 
+    public function registerConsumer(Request $request) {
+        // Validate the incoming request data
+        return $this->validateTheIncomingRequestData($request);
+    }
+
+    public function registerBusiness(Request $request) {
+        // Validate the incoming request data
+        return $this->validateTheIncomingRequestData($request);
+    }
+
     public function validateTheIncomingRequestData(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -157,8 +168,10 @@ class AuthController extends Controller
             'status' => 'required|integer',
             'user_type_id' => 'required|integer',
             'category_id' => 'required|integer',
+            'business_id' => 'required|integer',
             'is_deleted' => 'required|integer',
             'consent' => 'required|integer',
+            'push_notifications' => 'required|integer',
         ]);
 
         // If validation fails, return error response
@@ -184,8 +197,10 @@ class AuthController extends Controller
         $userTemp->status = $request->status;
         $userTemp->user_type_id = $request->user_type_id;
         $userTemp->category_id = $request->category_id;
+        $userTemp->business_id = $request->business_id;
         $userTemp->is_deleted = $request->is_deleted;
         $userTemp->consent = $request->consent;
+        $userTemp->push_notifications = $request->push_notifications;
 
         $userTemp->save();
 
@@ -196,16 +211,6 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => 'failure', 'message' => $e->getMessage()]);
         }
-    }
-
-    public function registerConsumer(Request $request) {
-        // Validate the incoming request data
-        return $this->validateTheIncomingRequestData($request);
-    }
-
-    public function registerBusiness(Request $request) {
-        // Validate the incoming request data
-        return $this->validateTheIncomingRequestData($request);
     }
 
     // Will delete all associated tokens with the user

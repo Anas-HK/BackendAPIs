@@ -23,8 +23,10 @@ return new class extends Migration
             $table->integer('status');
             $table->integer('user_type_id');
             $table->integer('category_id');
+            $table->integer('business_id')->default(null);
             $table->integer('is_deleted')->default(0);
             $table->integer('consent');
+            $table->integer('push_notifications');
             $table->timestamps();
         });
 

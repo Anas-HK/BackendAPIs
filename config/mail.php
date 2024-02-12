@@ -10,12 +10,12 @@ return [
             'port' => env('MAIL_PORT', 587),
             'encryption' => env('MAIL_ENCRYPTION', 'tls'),
             'username' => env('MAIL_USERNAME','anas.h.khan2244@gmail.com'),
-            'password' => env('MAIL_PASSWORD','ijpqrrygjcsezvne'),
+            'password' => env('MAIL_PASSWORD','hgyxiznoorozmysy'),
         ],
     ],
 
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'anas.h.khan2244@gmail.com'),
-        'name' => env('MAIL_FROM_NAME', 'Anas Khan'),
+        'name' => env('MAIL_FROM_NAME', 'Anas HK'),
     ],
 ];

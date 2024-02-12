@@ -19,6 +19,10 @@ $router->get('/', function () use ($router) {
 });
 
 $router->group(['prefix'=>'api'], function() use ($router) {
+    // Route for requesting a password reset email
+    $router->post('/forgot-password', 'ForgotPasswordController@forgotPassword');
+    // Route for resetting the password using the provided token
+    $router->post('/reset-password', 'ForgotPasswordController@resetPassword');
     $router->post('/verify-otp', 'AuthController@verifyOtp');
     $router->post('/register/consumer', 'AuthController@registerConsumer');
     $router->post('/register/business', 'AuthController@registerBusiness');

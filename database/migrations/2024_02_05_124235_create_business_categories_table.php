@@ -19,6 +19,6 @@ class CreateBusinessCategoriesTable extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('bussiness_categories');
+        Schema::dropIfExists('business_categories');
     }
 }

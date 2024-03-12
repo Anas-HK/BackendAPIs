@@ -36,6 +36,9 @@ $router->group(['prefix'=>'api'], function() use ($router) {
     $router->put('subscription/{id}', 'SubscriptionController@update');
     $router->delete('subscription/{id}', 'SubscriptionController@delete');
 
+    // Route requsting business categories
+    $router->get('/categories', 'BusinessCategories@getAll');
+
     // We will put our posts route in a group which will check auth middleware so that user will have to
     // login to access post CRUD operations.
     $router->group(['middleware' => 'auth'], function () use ($router) {

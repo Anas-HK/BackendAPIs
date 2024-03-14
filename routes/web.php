@@ -39,8 +39,14 @@ $router->group(['prefix'=>'api'], function() use ($router) {
     // Route requsting business categories
     $router->get('/categories', 'BusinessCategories@getAll');
 
+    // Routes relating to profile setup
+    // $router->get('/profile-setup', 'ProfileSetup@BusinessId');
+
+    // Route for data insertion after profile setup
+    $router->post('/insert-data', 'DataInsertionController@insertData');
+
     // We will put our posts route in a group which will check auth middleware so that user will have to
-    // login to access post CRUD operations.
+    // log in to access post CRUD operations.
     $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('/logout', 'AuthController@logout');
         $router->get('/posts', 'PostController@index');
@@ -48,6 +54,6 @@ $router->group(['prefix'=>'api'], function() use ($router) {
         $router->put('/posts/{id}', 'PostController@update');
         $router->delete('/posts/{id}', 'PostController@delete');
     });
- 
+
     // Taking apis outside for testing
 });

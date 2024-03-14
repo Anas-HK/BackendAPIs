@@ -10,6 +10,7 @@ class CreateOtpsTable extends Migration
     {
         Schema::create('otps', function (Blueprint $table) {
             $table->id();
+            $table->string('business_id')->default(0);
             $table->string('email')->nullable(false); // Add email column
             $table->string('code', 100)->nullable(false);
             $table->integer('status');

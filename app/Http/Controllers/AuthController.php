@@ -57,7 +57,7 @@ class AuthController extends Controller
             ]);
 
             // Before returning response, I need to save access token to users table.
-
+            // print_r($user->business_id); Business_id is being sent successfully
             // Return the response from the OAuth token endpoint
             return $response->getBody()->getContents();
         } catch (RequestException $e) {
@@ -94,7 +94,7 @@ class AuthController extends Controller
         }
 
         // Check if the OTP code has expired
-        $expirationTime = Carbon::now()->subMinutes(1);
+        $expirationTime = Carbon::now()->subMinutes(5);
         if ($otp->created_at->lt($expirationTime)) {
             // Mark OTP as expired
             $otp->status = 0; // 0 means expired
@@ -130,6 +130,8 @@ class AuthController extends Controller
             $user->business_id = $userTemp->business_id;
             $user->is_deleted = $userTemp->is_deleted;
             $user->consent = $userTemp->consent;
+            // If otp is verified than verified = 1
+            $user->verified = 1;
             $user->push_notifications = $userTemp->push_notifications;
 
             // Delete the user data from the UserTemp table
@@ -140,6 +142,7 @@ class AuthController extends Controller
                 $request->merge(['user' => $user, 'email' => $user->email, 'password' => $rawPassword]);
 
                 // Proceed with the login process or return a success response
+                // I don't need to only send business_id as Maaz can access the business_id from the whole user table's object which I'm sending in the request.
                 return $this->login($request);
             }
         } catch (\Exception $e) {
@@ -171,6 +174,7 @@ class AuthController extends Controller
             'business_id' => 'required|integer',
             'is_deleted' => 'required|integer',
             'consent' => 'required|integer',
+            'verified' => 'required|integer',
             'push_notifications' => 'required|integer',
         ]);
 
@@ -181,11 +185,17 @@ class AuthController extends Controller
 
         $otp = new Otp;
         $otp->email = $request->email;
-        $otp->code = mt_rand(100000, 999999); // Generate random OTP code
+        $otp->code = mt_rand(1000, 9999); // Generate random OTP code
         $otp->status = 1; // Active
         $otp->save();
 
         $otpCode = $otp->code;
+
+        // Profile Setup:
+
+        // Create an instance of ProfileSetup
+        $profileSetup = new DataInsertionController();
+        $businessId = $profileSetup->BusinessId();
 
         // Saving all data of user temporarily to access in verifyOTP function
         $userTemp = new UserTemp;
@@ -197,16 +207,19 @@ class AuthController extends Controller
         $userTemp->status = $request->status;
         $userTemp->user_type_id = $request->user_type_id;
         $userTemp->category_id = $request->category_id;
-        $userTemp->business_id = $request->business_id;
+        // Saving business_id I'm creating from profileSetup
+        $userTemp->business_id = $businessId;
         $userTemp->is_deleted = $request->is_deleted;
         $userTemp->consent = $request->consent;
+        $userTemp->verified = $request->verified;
         $userTemp->push_notifications = $request->push_notifications;
 
         $userTemp->save();
 
         try {
             Mail::to($request->email)->send(new \App\Mail\OtpVerification($otpCode));
-            return response()->json(['status' => 'success', 'message' => 'OTP has been sent to your email']);
+            return response()->json(['status' => 'success', 'message' => 'OTP has been sent to your email', 'data' => $businessId]);
+//            return response()->json(['businessId' => $businessId]);
 
         } catch (\Exception $e) {
             return response()->json(['status' => 'failure', 'message' => $e->getMessage()]);

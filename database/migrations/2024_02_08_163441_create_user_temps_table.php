@@ -26,6 +26,7 @@ return new class extends Migration
             $table->integer('business_id')->default(null);
             $table->integer('is_deleted')->default(0);
             $table->integer('consent');
+            $table->integer('verified')->default(0);
             $table->boolean('push_notifications');
             $table->timestamps();
         });

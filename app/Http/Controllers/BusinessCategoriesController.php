@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 
-class BusinessCategories extends Controller
+class BusinessCategoriesController extends Controller
 {
     public function getAll()
     {

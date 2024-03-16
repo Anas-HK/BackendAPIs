@@ -37,7 +37,7 @@ $router->group(['prefix'=>'api'], function() use ($router) {
     $router->delete('subscription/{id}', 'SubscriptionController@delete');
 
     // Route requsting business categories
-    $router->get('/categories', 'BusinessCategories@getAll');
+    $router->get('/categories', 'BusinessCategoriesController@getAll');
 
     // Routes relating to profile setup
     // $router->get('/profile-setup', 'ProfileSetup@BusinessId');
@@ -59,5 +59,5 @@ $router->group(['prefix'=>'api'], function() use ($router) {
 
 
 
-    
+
 });

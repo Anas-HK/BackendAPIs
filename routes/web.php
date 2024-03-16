@@ -43,7 +43,7 @@ $router->group(['prefix'=>'api'], function() use ($router) {
     // $router->get('/profile-setup', 'ProfileSetup@BusinessId');
 
     // Route for data insertion after profile setup
-    $router->post('/insert-data', 'DataInsertionController@insertData');
+    $router->post('/profile-setup', 'BusinessProfileController@profileSetup');
 
     // We will put our posts route in a group which will check auth middleware so that user will have to
     // log in to access post CRUD operations.

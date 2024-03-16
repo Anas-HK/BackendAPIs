@@ -116,6 +116,10 @@ class AuthController extends Controller
         $otp->is_used = 1;
         $otp->save();
 
+        // Create an instance of ProfileSetup
+        $profileSetup = new BusinessProfileController();
+        $businessId = $profileSetup->BusinessId();
+
         // Proceed with the registration process
         try {
             $user = new User;
@@ -127,12 +131,12 @@ class AuthController extends Controller
             $user->status = $userTemp->status;
             $user->user_type_id = $userTemp->user_type_id;
             $user->category_id = $userTemp->category_id;
-            $user->business_id = $userTemp->business_id;
+            $user->business_id = $businessId;
             $user->is_deleted = $userTemp->is_deleted;
             $user->consent = $userTemp->consent;
             // If otp is verified than verified = 1
             $user->verified = 1;
-            $user->push_notifications = $userTemp->push_notifications;
+            $user->UUID = $userTemp->UUID;
 
             // Delete the user data from the UserTemp table
             $userTemp->delete();
@@ -171,11 +175,11 @@ class AuthController extends Controller
             'status' => 'required|integer',
             'user_type_id' => 'required|integer',
             'category_id' => 'required|integer',
-            'business_id' => 'required|integer',
+            // 'business_id' => 'required|integer',
             'is_deleted' => 'required|integer',
             'consent' => 'required|integer',
-            'verified' => 'required|integer',
-            'push_notifications' => 'required|integer',
+            // 'verified' => 'required|integer',
+            'UUID' => 'required|integer',
         ]);
 
         // If validation fails, return error response
@@ -191,12 +195,6 @@ class AuthController extends Controller
 
         $otpCode = $otp->code;
 
-        // Profile Setup:
-
-        // Create an instance of ProfileSetup
-        $profileSetup = new DataInsertionController();
-        $businessId = $profileSetup->BusinessId();
-
         // Saving all data of user temporarily to access in verifyOTP function
         $userTemp = new UserTemp;
         $userTemp->name = $request->name;
@@ -207,18 +205,20 @@ class AuthController extends Controller
         $userTemp->status = $request->status;
         $userTemp->user_type_id = $request->user_type_id;
         $userTemp->category_id = $request->category_id;
-        // Saving business_id I'm creating from profileSetup
-        $userTemp->business_id = $businessId;
+        // Giving business_id as null because we don't need to give any value and the real business id will be assigned in otp_verfication. Giving null won't work.
+        $userTemp->business_id = 0;
         $userTemp->is_deleted = $request->is_deleted;
         $userTemp->consent = $request->consent;
-        $userTemp->verified = $request->verified;
-        $userTemp->push_notifications = $request->push_notifications;
+        // We're not taking this because by default, verified = 0 (not verified). And we don't want it to be nullS
+        // $userTemp->verified = $request->verified;
+        $userTemp->UUID = $request->UUID;
 
         $userTemp->save();
 
         try {
             Mail::to($request->email)->send(new \App\Mail\OtpVerification($otpCode));
-            return response()->json(['status' => 'success', 'message' => 'OTP has been sent to your email', 'data' => $businessId]);
+            // removing data field from response json
+            return response()->json(['status' => 'success', 'message' => 'OTP has been sent to your email']);
 //            return response()->json(['businessId' => $businessId]);
 
         } catch (\Exception $e) {

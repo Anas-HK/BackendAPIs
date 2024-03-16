@@ -9,7 +9,7 @@ use App\Models\CardInformation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class DataInsertionController extends Controller
+class BusinessProfileController extends Controller
 {
     public function BusinessId() {
 
@@ -34,7 +34,7 @@ class DataInsertionController extends Controller
 
     // Now maaz will send me all data including business id which I need to insert in the relevant tables.
     // The tables are 1) business 2) business_social_media_links 3) business_timings
-    public function insertData(Request $request)
+    public function profileSetup(Request $request)
     {
         // Define validation rules for each set of data
         $validationRules = [
@@ -42,6 +42,7 @@ class DataInsertionController extends Controller
             'social_media_data' => 'required|array',
             'timings_data' => 'required|array',
             'card_info_data' => 'required|array',
+            'business_id' => 'required|integer'
         ];
 
         // Perform validation
@@ -53,13 +54,15 @@ class DataInsertionController extends Controller
         }
 
         // Extract data from the request
+        $businessId = $request->input('business_id');
         $businessData = $request->input('business_data');
         $socialMediaData = $request->input('social_media_data');
         $timingsData = $request->input('timings_data');
         $cardInfoData = $request->input('card_info_data');
 
         // Insert data into the respective tables
-        $businessId = $this->insertBusiness($businessData);
+        // Not taking business_id from business table because Maaz will always send businessId and it is required
+        $this->insertBusiness($businessData);
         $this->insertSocialMediaLinks($businessId, $socialMediaData);
         $this->insertBusinessTimings($businessId, $timingsData);
         $this->insertCardInformation($businessId, $cardInfoData);
@@ -85,28 +88,34 @@ class DataInsertionController extends Controller
 
     private function insertSocialMediaLinks($businessId, $data)
     {
-        // Create an instance of the BusinessSocialMediaLink model
-        $socialMediaLink = new BusinessSocialMediaLink();
+        // Loop through each social media data and insert individually
+        foreach ($data as $socialMedia) {
+            // Create an instance of the BusinessSocialMediaLink model
+            $socialMediaLink = new BusinessSocialMediaLink();
 
-        // Fill the social media link data
-        $socialMediaLink->business_id = $businessId;
-        $socialMediaLink->fill($data);
+            // Fill the social media link data
+            $socialMediaLink->business_id = $businessId;
+            $socialMediaLink->fill($socialMedia);
 
-        // Save the social media link data
-        $socialMediaLink->save();
+            // Save the social media link data
+            $socialMediaLink->save();
+        }
     }
 
     private function insertBusinessTimings($businessId, $data)
     {
-        // Create an instance of the BusinessTiming model
-        $businessTiming = new BusinessTiming();
+        // Loop through each timing data and insert individually
+        foreach ($data as $timing) {
+            // Create an instance of the BusinessTiming model
+            $businessTiming = new BusinessTiming();
 
-        // Fill the timing data
-        $businessTiming->business_id = $businessId;
-        $businessTiming->fill($data);
+            // Fill the timing data
+            $businessTiming->business_id = $businessId;
+            $businessTiming->fill($timing);
 
-        // Save the timing data
-        $businessTiming->save();
+            // Save the timing data
+            $businessTiming->save();
+        }
     }
 
     private function insertCardInformation($businessId, $data)

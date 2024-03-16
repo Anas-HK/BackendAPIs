@@ -171,15 +171,15 @@ class AuthController extends Controller
             'email' => 'required|email|max:100|unique:users', // Maximum length of 100 characters
             'password' => 'required|string|max:255|min:6', // Maximum length of 255 characters
             'phone' => 'required|string|max:100|unique:users', // Maximum length of 100 characters
-            'date_of_birth' => 'required|date',
-            'status' => 'required|integer',
+            // 'date_of_birth' => 'required|date',
+            // 'status' => 'required|integer',
             'user_type_id' => 'required|integer',
             'category_id' => 'required|integer',
             // 'business_id' => 'required|integer',
-            'is_deleted' => 'required|integer',
-            'consent' => 'required|integer',
+            // 'is_deleted' => 'required|integer',
+            // 'consent' => 'required|integer',
             // 'verified' => 'required|integer',
-            'UUID' => 'required|integer',
+            // 'UUID' => 'required|integer',
         ]);
 
         // If validation fails, return error response
@@ -201,17 +201,17 @@ class AuthController extends Controller
         $userTemp->email = $request->email;
         $userTemp->password = $request->password;
         $userTemp->phone = $request->phone;
-        $userTemp->date_of_birth = $request->date_of_birth;
-        $userTemp->status = $request->status;
+        $userTemp->date_of_birth = '1900-01-01';
+        $userTemp->status = 1;
         $userTemp->user_type_id = $request->user_type_id;
         $userTemp->category_id = $request->category_id;
         // Giving business_id as null because we don't need to give any value and the real business id will be assigned in otp_verfication. Giving null won't work.
         $userTemp->business_id = 0;
-        $userTemp->is_deleted = $request->is_deleted;
-        $userTemp->consent = $request->consent;
+        $userTemp->is_deleted = 0;
+        $userTemp->consent = 0;
         // We're not taking this because by default, verified = 0 (not verified). And we don't want it to be nullS
         // $userTemp->verified = $request->verified;
-        $userTemp->UUID = $request->UUID;
+        $userTemp->UUID = 0;
 
         $userTemp->save();
 

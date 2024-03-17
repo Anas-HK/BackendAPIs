@@ -17,7 +17,6 @@ class AuthController extends Controller
 {
     public function login(Request $request) {
         // Validate the incoming request data
-        // Through this if any errors occur it will be handled gently with a json response
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string',
@@ -56,10 +55,14 @@ class AuthController extends Controller
                 ]
             ]);
 
-            // Before returning response, I need to save access token to users table.
-            // print_r($user->business_id); Business_id is being sent successfully
-            // Return the response from the OAuth token endpoint
-            return $response->getBody()->getContents();
+            // Decode the response body
+            $responseData = json_decode($response->getBody()->getContents(), true);
+
+            // Include business ID in the response if user has one
+            $responseData['business_id'] = $user->business_id;
+
+            // Return the response with additional data
+            return response()->json($responseData);
         } catch (RequestException $e) {
             // Handle request exceptions (e.g., connection errors)
             return response()->json(['status'=> 'failure', 'message' => 'your error' .  $e->getMessage()]);
@@ -68,6 +71,7 @@ class AuthController extends Controller
             return response()->json(['status'=> 'failure', 'message' => $e->getMessage()]);
         }
     }
+
 
     // New method to handle OTP verification
     public function verifyOtp(Request $request)

@@ -13,6 +13,7 @@ class CreateOtpsTable extends Migration
             $table->string('business_id')->default(0);
             $table->string('email')->nullable(false); // Add email column
             $table->string('code', 100)->nullable(false);
+            $table->integer('UUID');
             $table->integer('status');
             $table->integer('is_used')->default(0);
             $table->timestamps();

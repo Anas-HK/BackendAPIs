@@ -72,6 +72,56 @@ class AuthController extends Controller
         }
     }
 
+    // Will recieve UUID as request and need to find the otp code with that UUID, if true than will set that OTP code is_used to 1 and send new otp
+    public function resendOtp(Request $request)
+    {
+        // Validate the incoming request data
+        $validator = Validator::make($request->all(), [
+            'UUID' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'failure', 'message' => $validator->errors()->first()]);
+        }
+
+        // Find the OTP record matching the provided UUID
+        $otp = Otp::where('UUID', $request->UUID)->first();
+
+        // If no matching OTP record is found, return failure response
+        if (!$otp) {
+            return response()->json(['status' => 'failure', 'message' => 'No OTP record found for the provided UUID.']);
+        }
+
+        // Check if the OTP has already been used
+        if ($otp->is_used) {
+            return response()->json(['status' => 'failure', 'message' => 'OTP has already been used.']);
+        }
+
+        // Generate a new OTP code
+        $newOtpCode = mt_rand(1000, 9999);
+
+        // Create a new OTP record in the OTP table
+        $newOtp = new Otp();
+        $newOtp->email = $otp->email;
+        $newOtp->code = $newOtpCode;
+        $newOtp->UUID = $otp->UUID; // Assuming you want to keep the same UUID
+        $newOtp->status = 1; // Assuming you want to set the status to active
+        $newOtp->save();
+
+        // Mark the existing OTP record as used
+        $otp->is_used = 1;
+        $otp->save();
+
+        // Resend the new OTP email to the corresponding email address
+        try {
+            Mail::to($newOtp->email)->send(new \App\Mail\OtpVerification($newOtpCode));
+            return response()->json(['status' => 'success', 'message' => 'New OTP has been resent to the email address.']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'failure', 'message' => 'Failed to resend OTP.']);
+        }
+    }
+
+
 
     // New method to handle OTP verification
     public function verifyOtp(Request $request)
@@ -183,7 +233,7 @@ class AuthController extends Controller
             // 'is_deleted' => 'required|integer',
             // 'consent' => 'required|integer',
             // 'verified' => 'required|integer',
-            // 'UUID' => 'required|integer',
+             'UUID' => 'required|integer',
         ]);
 
         // If validation fails, return error response
@@ -195,6 +245,7 @@ class AuthController extends Controller
         $otp->email = $request->email;
         $otp->code = mt_rand(1000, 9999); // Generate random OTP code
         $otp->status = 1; // Active
+        $otp->UUID = $request->UUID;
         $otp->save();
 
         $otpCode = $otp->code;
@@ -222,7 +273,7 @@ class AuthController extends Controller
         $userTemp->consent = 0;
         // We're not taking this because by default, verified = 0 (not verified). And we don't want it to be nullS
         // $userTemp->verified = $request->verified;
-        $userTemp->UUID = 0;
+        $userTemp->UUID = $request->UUID;
 
         $userTemp->save();
 

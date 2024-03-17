@@ -24,6 +24,7 @@ $router->group(['prefix'=>'api'], function() use ($router) {
     // Route for resetting the password using the provided token
     $router->post('/reset-password', 'ForgotPasswordController@resetPassword');
     $router->post('/verify-otp', 'AuthController@verifyOtp');
+    $router->post('/resend-otp', 'AuthController@resendOtp');
     $router->post('/register/consumer', 'AuthController@registerConsumer');
     $router->post('/register/business', 'AuthController@registerBusiness');
     $router->post('/login', 'AuthController@login');

@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
             $table->integer('is_deleted')->default(0);
             $table->integer('consent');
             $table->integer('verified')->default(0);
-            $table->boolean('UUID');
+            $table->integer('UUID');
             $table->timestamps();
         });
 

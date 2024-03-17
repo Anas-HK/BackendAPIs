@@ -160,15 +160,15 @@ class AuthController extends Controller
 
     public function registerConsumer(Request $request) {
         // Validate the incoming request data
-        return $this->validateTheIncomingRequestData($request);
+        return $this->validateTheIncomingRequestData($request, 1);
     }
 
     public function registerBusiness(Request $request) {
         // Validate the incoming request data
-        return $this->validateTheIncomingRequestData($request);
+        return $this->validateTheIncomingRequestData($request, 3);
     }
 
-    public function validateTheIncomingRequestData(Request $request): \Illuminate\Http\JsonResponse
+    public function validateTheIncomingRequestData(Request $request, $userType): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255', // Maximum length of 255 characters
@@ -177,7 +177,7 @@ class AuthController extends Controller
             'phone' => 'required|string|max:100|unique:users', // Maximum length of 100 characters
             // 'date_of_birth' => 'required|date',
             // 'status' => 'required|integer',
-            'user_type_id' => 'required|integer',
+            //'user_type_id' => 'required|integer',
             'category_id' => 'required|integer',
             // 'business_id' => 'required|integer',
             // 'is_deleted' => 'required|integer',
@@ -207,7 +207,14 @@ class AuthController extends Controller
         $userTemp->phone = $request->phone;
         $userTemp->date_of_birth = '1900-01-01';
         $userTemp->status = 1;
-        $userTemp->user_type_id = $request->user_type_id;
+        // If userType is 3 than it'll be set to business, otherwise it'll be 1 for consumer.
+        if($userType == 3) {
+            $userTemp->user_type_id = 3;
+        }
+        else {
+            $userTemp->user_type_id = 1;
+        }
+
         $userTemp->category_id = $request->category_id;
         // Giving business_id as null because we don't need to give any value and the real business id will be assigned in otp_verfication. Giving null won't work.
         $userTemp->business_id = 0;

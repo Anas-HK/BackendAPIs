@@ -24,8 +24,8 @@ class AuthController extends Controller
         ]);
 
         // If validation fails, return error response
-        if ($validator->fails()) {  
-            return response()->json(['status_code':Response::HTTP_OK, 'message' => $validator->errors()->first()]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 'failure', 'message' => $validator->errors()->first(), ]);
         }
 
         $email = $request->email;
@@ -36,12 +36,12 @@ class AuthController extends Controller
 
         // Check if user with the provided email exists
         if (!$user) {
-            return response()->json(['status_code':Response::HTTP_OK, 'message' => 'User not found']);
+            return response()->json(['status' => 'failure', 'message' => 'User not found']);
         }
 
         // Verify the password against the stored password hash
         if (!app('hash')->check($password, $user->password)) {
-            return response()->json(['status_code':Response::HTTP_OK, 'message' => 'Invalid credentials']);
+            return response()->json(['status' => 'failure', 'message' => 'Invalid credentials']);
         }
 
         $client = new Client();
@@ -63,16 +63,13 @@ class AuthController extends Controller
             $responseData['business_id'] = $user->business_id;
 
             // Return the response with additional data
-            return response()->json($responseData
-            // ,
-            // 'status_code':Response::HTTP_OK
-        );
+            return response()->json($responseData);
         } catch (RequestException $e) {
             // Handle request exceptions (e.g., connection errors)
-            return response()->json(['status_code':Response::HTTP_OK, 'message' => 'your error' .  $e->getMessage()]);
+            return response()->json(['status'=> 'failure', 'message' => 'your error' .  $e->getMessage()]);
         } catch (\Exception $e) {
             // Handle other exceptions
-            return response()->json(['status_code':Response::HTTP_OK, 'message' => $e->getMessage()]);
+            return response()->json(['status'=> 'failure', 'message' => $e->getMessage()]);
         }
     }
 

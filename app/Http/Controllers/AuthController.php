@@ -90,12 +90,12 @@ class AuthController extends Controller
 
         // If no matching OTP record is found, return failure response
         if (!$otp) {
-            return response()->json(['status' => 'failure', 'message' => 'No OTP record found for the provided UUID.']);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => 'No OTP record found for the provided UUID.']);
         }
 
         // Check if the OTP has already been used
         if ($otp->is_used) {
-            return response()->json(['status' => 'failure', 'message' => 'OTP has already been used.']);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => 'OTP has already been used.']);
         }
 
         // Generate a new OTP code
@@ -116,9 +116,9 @@ class AuthController extends Controller
         // Resend the new OTP email to the corresponding email address
         try {
             Mail::to($newOtp->email)->send(new \App\Mail\OtpVerification($newOtpCode));
-            return response()->json(['status' => 'success', 'message' => 'New OTP has been resent to the email address.']);
+            return response()->json(['status_code'=>Response::HTTP_OK, 'message' => 'New OTP has been resent to the email address.']);
         } catch (\Exception $e) {
-            return response()->json(['status' => 'failure', 'message' => 'Failed to resend OTP.']);
+            return response()->json(['status_code'=>Response::HTTP_INTERNAL_SERVER_ERROR, 'message' => 'Failed to resend OTP.']);
         }
     }
 

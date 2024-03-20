@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
@@ -24,7 +25,7 @@ class AuthController extends Controller
 
         // If validation fails, return error response
         if ($validator->fails()) {
-            return response()->json(['status' => 'failure', 'message' => $validator->errors()->first()]);
+            return response()->json(['status' => 'failure', 'message' => $validator->errors()->first()], JsonResponse::HTTP_BAD_REQUEST);
         }
 
         $email = $request->email;
@@ -35,12 +36,12 @@ class AuthController extends Controller
 
         // Check if user with the provided email exists
         if (!$user) {
-            return response()->json(['status' => 'failure', 'message' => 'User not found']);
+            return response()->json(['status' => 'failure', 'message' => 'User not found'],JsonResponse::HTTP_NOT_FOUND);
         }
 
         // Verify the password against the stored password hash
         if (!app('hash')->check($password, $user->password)) {
-            return response()->json(['status' => 'failure', 'message' => 'Invalid credentials']);
+            return response()->json(['status' => 'failure', 'message' => 'Invalid credentials'],, JsonResponse::HTTP_UNAUTHORIZED);
         }
 
         $client = new Client();
@@ -62,13 +63,13 @@ class AuthController extends Controller
             $responseData['business_id'] = $user->business_id;
 
             // Return the response with additional data
-            return response()->json($responseData);
+            return response()->json($responseData, JsonResponse::HTTP_OK);
         } catch (RequestException $e) {
             // Handle request exceptions (e.g., connection errors)
-            return response()->json(['status'=> 'failure', 'message' => 'your error' .  $e->getMessage()]);
+            return response()->json(['status'=> 'failure', 'message' => 'your error' .  $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         } catch (\Exception $e) {
             // Handle other exceptions
-            return response()->json(['status'=> 'failure', 'message' => $e->getMessage()]);
+            return response()->json(['status'=> 'failure', 'message' => $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

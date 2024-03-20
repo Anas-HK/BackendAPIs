@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
@@ -25,7 +26,7 @@ class AuthController extends Controller
 
         // If validation fails, return error response
         // if ($validator->fails()) {
-            return response()->json(['status' => 'failure', 'message' => 'Error', JsonResponse::HTTP_BAD_REQUEST], 200);
+            return response()->json(['status' => 'failure', 'message' => 'Error', 'status' => Response::HTTP_OK]);
         // }
 
         // $email = $request->email;

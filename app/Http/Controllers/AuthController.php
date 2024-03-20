@@ -170,7 +170,7 @@ class AuthController extends Controller
         $userTemp = UserTemp::where('email', $email)->first();
         
         if (!$userTemp) {
-            return response()->json(['status_code'=>Response::HTTP_OK, 'message' => 'User not found']);
+            return response()->json(['status_code'=>Response::HTTP_NOT_FOUND, 'message' => 'User not found']);
         }
 
         // Store the password before deleting the UserTemp object
@@ -211,7 +211,9 @@ class AuthController extends Controller
 
                 // Proceed with the login process or return a success response
                 // I don't need to only send business_id as Maaz can access the business_id from the whole user table's object which I'm sending in the request.
-                return $this->login($request);
+                return 
+                response()->json(['status_code'=>Response::HTTP_NOT_FOUND, 'message' => 'Done All']);
+                // $this->login($request);
             }
         } catch (\Exception $e) {
             return response()->json(['status' => 'failure', 'message' => 'Error registering user: ' . $e->getMessage()]);

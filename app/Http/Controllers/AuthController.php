@@ -24,9 +24,9 @@ class AuthController extends Controller
         // ]);
 
         // If validation fails, return error response
-        if ($validator->fails()) {
-            return response()->json(['status' => 'failure', 'message' => 'Error', JsonResponse::HTTP_BAD_REQUEST]);
-        }
+        // if ($validator->fails()) {
+            return response()->json(['status' => 'failure', 'message' => 'Error', 'status_code':JsonResponse::HTTP_BAD_REQUEST]);
+        // }
 
         // $email = $request->email;
         // $password = $request->password;

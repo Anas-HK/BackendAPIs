@@ -211,8 +211,9 @@ class AuthController extends Controller
 
                 // Proceed with the login process or return a success response
                 // I don't need to only send business_id as Maaz can access the business_id from the whole user table's object which I'm sending in the request.
-                return 
-                response()->json(['status_code'=>Response::HTTP_NOT_FOUND, 'message' => 'Done All']);
+                return response()->json(['status_code'=>Response::HTTP_NOT_FOUND, 'message' => 'Hello']);
+                // return 
+                // response()->json(['status_code'=>Response::HTTP_NOT_FOUND, 'message' => 'Done All']);
                 // $this->login($request);
             }
         } catch (\Exception $e) {

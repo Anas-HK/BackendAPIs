@@ -96,7 +96,6 @@ class AuthController extends Controller
         if ($otp->is_used) {
             return response()->json(['status' => 'failure', 'message' => 'OTP has already been used.']);
         }
-
         // Generate a new OTP code
         $newOtpCode = mt_rand(1000, 9999);
 

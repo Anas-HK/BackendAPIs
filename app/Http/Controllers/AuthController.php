@@ -24,53 +24,53 @@ class AuthController extends Controller
         ]);
 
         // If validation fails, return error response
-        if ($validator->fails()) {
-            return response()->json(['status' => 'failure', 'message' => $validator->errors()->first()], JsonResponse::HTTP_BAD_REQUEST);
-        }
+        // if ($validator->fails()) {
+            return response()->json(['status' => 'failure', 'message' => 'Error'], JsonResponse::HTTP_BAD_REQUEST);
+        // }
 
-        $email = $request->email;
-        $password = $request->password;
+        // $email = $request->email;
+        // $password = $request->password;
 
-        // Retrieve the user record from the database based on the provided email
-        $user = User::where('email', $email)->first();
+        // // Retrieve the user record from the database based on the provided email
+        // $user = User::where('email', $email)->first();
 
-        // Check if user with the provided email exists
-        if (!$user) {
-            return response()->json(['status' => 'failure', 'message' => 'User not found'],JsonResponse::HTTP_NOT_FOUND);
-        }
+        // // Check if user with the provided email exists
+        // if (!$user) {
+        //     return response()->json(['status' => 'failure', 'message' => 'User not found'],JsonResponse::HTTP_NOT_FOUND);
+        // }
 
-        // Verify the password against the stored password hash
-        if (!app('hash')->check($password, $user->password)) {
-            return response()->json(['status' => 'failure', 'message' => 'Invalid credentials'],, JsonResponse::HTTP_UNAUTHORIZED);
-        }
+        // // Verify the password against the stored password hash
+        // if (!app('hash')->check($password, $user->password)) {
+        //     return response()->json(['status' => 'failure', 'message' => 'Invalid credentials'],, JsonResponse::HTTP_UNAUTHORIZED);
+        // }
 
-        $client = new Client();
-        try {
-            $response = $client->post(config('service.passport.login_endpoint'), [
-                "form_params" => [
-                    "client_secret" => config('service.passport.client_secret'),
-                    "grant_type" => "password",
-                    "client_id" => config('service.passport.client_id'),
-                    "username" => $request->email,
-                    "password" => $request->password
-                ]
-            ]);
+        // $client = new Client();
+        // try {
+        //     $response = $client->post(config('service.passport.login_endpoint'), [
+        //         "form_params" => [
+        //             "client_secret" => config('service.passport.client_secret'),
+        //             "grant_type" => "password",
+        //             "client_id" => config('service.passport.client_id'),
+        //             "username" => $request->email,
+        //             "password" => $request->password
+        //         ]
+        //     ]);
 
-            // Decode the response body
-            $responseData = json_decode($response->getBody()->getContents(), true);
+        //     // Decode the response body
+        //     $responseData = json_decode($response->getBody()->getContents(), true);
 
-            // Include business ID in the response if user has one
-            $responseData['business_id'] = $user->business_id;
+        //     // Include business ID in the response if user has one
+        //     $responseData['business_id'] = $user->business_id;
 
-            // Return the response with additional data
-            return response()->json($responseData, JsonResponse::HTTP_OK);
-        } catch (RequestException $e) {
-            // Handle request exceptions (e.g., connection errors)
-            return response()->json(['status'=> 'failure', 'message' => 'your error' .  $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
-        } catch (\Exception $e) {
-            // Handle other exceptions
-            return response()->json(['status'=> 'failure', 'message' => $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        //     // Return the response with additional data
+        //     return response()->json($responseData, JsonResponse::HTTP_OK);
+        // } catch (RequestException $e) {
+        //     // Handle request exceptions (e.g., connection errors)
+        //     return response()->json(['status'=> 'failure', 'message' => 'your error' .  $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        // } catch (\Exception $e) {
+        //     // Handle other exceptions
+        //     return response()->json(['status'=> 'failure', 'message' => $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        // }
     }
 
     // Will recieve UUID as request and need to find the otp code with that UUID, if true than will set that OTP code is_used to 1 and send new otp

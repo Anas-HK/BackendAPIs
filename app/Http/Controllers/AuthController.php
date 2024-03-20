@@ -24,8 +24,8 @@ class AuthController extends Controller
         ]);
 
         // If validation fails, return error response
-        if ($validator->fails()) {
-            return response()->json(['status_code':Response::HTTP_BAD_REQUEST, 'message' => $validator->errors()->first()]);
+        if ($validator->fails()) {  
+            return response()->json(['status_code':Response::HTTP_OK, 'message' => $validator->errors()->first()]);
         }
 
         $email = $request->email;

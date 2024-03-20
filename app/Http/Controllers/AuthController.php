@@ -78,11 +78,11 @@ class AuthController extends Controller
     {
         // Validate the incoming request data
         $validator = Validator::make($request->all(), [
-            'UUID' => 'required|integer',
+            'email' => 'required|email',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['status' => 'failure', 'message' => $validator->errors()->first()]);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => $validator->errors()->first()]);
         }
 
         // Find the OTP record matching the provided UUID
@@ -130,6 +130,7 @@ class AuthController extends Controller
         // Validate the incoming request data
         $validator = Validator::make($request->all(), [
             'otp_code' => 'required|string',
+            'email' => 'required|email'
         ]);
 
         if ($validator->fails()) {
@@ -137,9 +138,11 @@ class AuthController extends Controller
         }
 
         $otpCode = $request->otp_code;
+        $email = $request->email;
 
         // Retrieve the OTP record from the database based on the provided OTP code
         $otp = Otp::where('code', $otpCode)
+            ->where('email', $email) // Add email condition
             ->where('status', 1) // Assuming 1 means active
             ->where('is_used', 0) // Assuming 0 means not used
             ->first();
@@ -163,6 +166,10 @@ class AuthController extends Controller
 
         // Retrieve the user data from the UserTemp table
         $userTemp = UserTemp::where('email', $email)->first();
+        
+        if (!$userTemp) {
+            return response()->json(['status' => 'failure', 'message' => 'User not found']);
+        }
 
         // Store the password before deleting the UserTemp object
          $rawPassword = $userTemp->password;

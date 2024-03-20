@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
@@ -24,9 +25,9 @@ class AuthController extends Controller
 
         // If validation fails, return error response
         if ($validator->fails()) {
-            return response()->json(['status' => 'failure', 'message' => $validator->errors()->first()]);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => $validator->errors()->first()]);
         }
-
+        
         $email = $request->email;
         $password = $request->password;
 
@@ -35,12 +36,12 @@ class AuthController extends Controller
 
         // Check if user with the provided email exists
         if (!$user) {
-            return response()->json(['status' => 'failure', 'message' => 'User not found']);
+            return response()->json(['status_code'=>Response::HTTP_NOT_FOUND, 'message' => 'User not found']);
         }
 
         // Verify the password against the stored password hash
         if (!app('hash')->check($password, $user->password)) {
-            return response()->json(['status' => 'failure', 'message' => 'Invalid credentials']);
+            return response()->json(['status_code'=>Response::HTTP_UNAUTHORIZED, 'message' => 'Invalid credentials']);
         }
 
         $client = new Client();
@@ -65,10 +66,10 @@ class AuthController extends Controller
             return response()->json($responseData);
         } catch (RequestException $e) {
             // Handle request exceptions (e.g., connection errors)
-            return response()->json(['status'=> 'failure', 'message' => 'your error' .  $e->getMessage()]);
+            return response()->json(['status_code'=>Response::HTTP_INTERNAL_SERVER_ERROR, 'message' => 'your error' .  $e->getMessage()]);
         } catch (\Exception $e) {
             // Handle other exceptions
-            return response()->json(['status'=> 'failure', 'message' => $e->getMessage()]);
+            return response()->json(['status_code'=>Response::HTTP_INTERNAL_SERVER_ERROR, 'message' => $e->getMessage()]);
         }
     }
 
@@ -237,7 +238,7 @@ class AuthController extends Controller
 
         // If validation fails, return error response
         if ($validator->fails()) {
-            return response()->json(['status' => 'failure', 'message' => $validator->errors()->first()]);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => $validator->errors()->first()]);
         }
 
         $otp = new Otp;
@@ -279,11 +280,11 @@ class AuthController extends Controller
         try {
             Mail::to($request->email)->send(new \App\Mail\OtpVerification($otpCode));
             // removing data field from response json
-            return response()->json(['status' => 'success', 'message' => 'OTP has been sent to your email']);
+            return response()->json(['status_code'=>Response::HTTP_OK, 'message' => 'OTP has been sent to your email']);
 //            return response()->json(['businessId' => $businessId]);
 
         } catch (\Exception $e) {
-            return response()->json(['status' => 'failure', 'message' => $e->getMessage()]);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => $e->getMessage()]);
         }
     }
 

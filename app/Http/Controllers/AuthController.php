@@ -110,8 +110,10 @@ class AuthController extends Controller
         $newOtp->save();
 
         // Mark the existing OTP record as used
-        $otp->is_used = 1;
-        $otp->save();
+
+        // I am commenting it because resend otp user multiple times hit karsakta hai or puraane wale ka is_used true horaha hai yahan pr jiski wajah se OTP aik hii baar jaaraha hai 2sri baar me OTP has already been used
+        // $otp->is_used = 1;
+        // $otp->save();
 
         // Resend the new OTP email to the corresponding email address
         try {

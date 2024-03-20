@@ -170,7 +170,7 @@ class AuthController extends Controller
         $userTemp = UserTemp::where('email', $email)->first();
         
         if (!$userTemp) {
-            return response()->json(['status_code'=>Response::HTTP_NOT_FOUND, 'message' => 'User not found']);
+            return response()->json(['status_code'=>Response::HTTP_OK, 'message' => 'User not found']);
         }
 
         // Store the password before deleting the UserTemp object

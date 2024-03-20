@@ -36,12 +36,12 @@ class AuthController extends Controller
 
         // Check if user with the provided email exists
         if (!$user) {
-            return response()->json(['status_code':Response::HTTP_NOT_FOUND, 'message' => 'User not found']);
+            return response()->json(['status_code':Response::HTTP_OK, 'message' => 'User not found']);
         }
 
         // Verify the password against the stored password hash
         if (!app('hash')->check($password, $user->password)) {
-            return response()->json(['status_code':Response::HTTP_UNAUTHORIZED, 'message' => 'Invalid credentials']);
+            return response()->json(['status_code':Response::HTTP_OK, 'message' => 'Invalid credentials']);
         }
 
         $client = new Client();
@@ -69,10 +69,10 @@ class AuthController extends Controller
         );
         } catch (RequestException $e) {
             // Handle request exceptions (e.g., connection errors)
-            return response()->json(['status_code':Response::HTTP_INTERNAL_SERVER_ERROR, 'message' => 'your error' .  $e->getMessage()]);
+            return response()->json(['status_code':Response::HTTP_OK, 'message' => 'your error' .  $e->getMessage()]);
         } catch (\Exception $e) {
             // Handle other exceptions
-            return response()->json(['status_code':Response::HTTP_INTERNAL_SERVER_ERROR, 'message' => $e->getMessage()]);
+            return response()->json(['status_code':Response::HTTP_OK, 'message' => $e->getMessage()]);
         }
     }
 

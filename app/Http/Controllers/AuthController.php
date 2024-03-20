@@ -134,7 +134,7 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['status' => 'failure', 'message' => $validator->errors()->first()]);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST,, 'message' => $validator->errors()->first()]);
         }
 
         $otpCode = $request->otp_code;

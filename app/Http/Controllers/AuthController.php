@@ -239,7 +239,7 @@ class AuthController extends Controller
 
         // If validation fails, return error response
         if ($validator->fails()) {
-            return response()->json(['status' => 'failure', 'message' => $validator->errors()->first()]);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => $validator->errors()->first()]);
         }
 
         $otp = new Otp;
@@ -281,11 +281,11 @@ class AuthController extends Controller
         try {
             Mail::to($request->email)->send(new \App\Mail\OtpVerification($otpCode));
             // removing data field from response json
-            return response()->json(['status' => 'success', 'message' => 'OTP has been sent to your email']);
+            return response()->json(['status_code'=>Response::HTTP_OK, 'message' => 'OTP has been sent to your email']);
 //            return response()->json(['businessId' => $businessId]);
 
         } catch (\Exception $e) {
-            return response()->json(['status' => 'failure', 'message' => $e->getMessage()]);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => $e->getMessage()]);
         }
     }
 

@@ -148,7 +148,7 @@ class AuthController extends Controller
             ->first();
 
         if (!$otp) {
-            return response()->json(['status' => 'failure', 'message' => 'Invalid OTP']);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => 'Invalid OTP']);
         }
 
         // Check if the OTP code has expired
@@ -157,7 +157,7 @@ class AuthController extends Controller
             // Mark OTP as expired
             $otp->status = 0; // 0 means expired
             $otp->save();
-            return response()->json(['status' => 'failure', 'message' => 'OTP code has expired. Please generate a new one.']);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => 'OTP code has expired. Please generate a new one.']);
         }
 
         // Retrieve the email associated with the OTP
@@ -168,7 +168,7 @@ class AuthController extends Controller
         $userTemp = UserTemp::where('email', $email)->first();
         
         if (!$userTemp) {
-            return response()->json(['status' => 'failure', 'message' => 'User not found']);
+            return response()->json(['status_code'=>Response::HTTP_NOT_FOUND, 'message' => 'User not found']);
         }
 
         // Store the password before deleting the UserTemp object

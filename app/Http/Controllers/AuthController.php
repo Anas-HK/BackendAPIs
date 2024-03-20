@@ -86,7 +86,7 @@ class AuthController extends Controller
         }
 
         // Find the OTP record matching the provided UUID
-        $otp = Otp::where('email', $request->UUID)->first();
+        $otp = Otp::where('email', $request->email)->first();
 
         // If no matching OTP record is found, return failure response
         if (!$otp) {

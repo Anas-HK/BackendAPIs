@@ -77,25 +77,33 @@ class AuthController extends Controller
     public function resendOtp(Request $request)
     {
         // Validate the incoming request data
+        // Maaz changed from requiring UUID to email
         $validator = Validator::make($request->all(), [
-            'UUID' => 'required|integer',
+            'email' => 'required|email',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['status' => 'failure', 'message' => $validator->errors()->first()]);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => $validator->errors()->first()]);
         }
 
 
-        $otp = Otp::where('UUID', $request->UUID)->first();
+        // $otp = Otp::where('UUID', $request->UUID)->first();
+
+        // Maaz changed from finding OTP
+        // Find the OTP record matching the provided UUID
+        $otp = Otp::where('email', $request->email)->first();
 
         // If no matching OTP record is found, return failure response
+//        if (!$otp) {
+//            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => 'No OTP record found for the provided UUID.']);
+//        }
         if (!$otp) {
-            return response()->json(['status' => 'failure', 'message' => 'No OTP record found for the provided UUID.']);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => 'No OTP record found for the provided email.']);
         }
 
         // Check if the OTP has already been used
         if ($otp->is_used) {
-            return response()->json(['status' => 'failure', 'message' => 'OTP has already been used.']);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => 'OTP has already been used.']);
         }
         // Generate a new OTP code
         $newOtpCode = mt_rand(1000, 9999);
@@ -109,15 +117,17 @@ class AuthController extends Controller
         $newOtp->save();
 
         // Mark the existing OTP record as used
-        $otp->is_used = 1;
-        $otp->save();
+
+        // I am commenting it because resend otp user multiple times hit karsakta hai or puraane wale ka is_used true horaha hai yahan pr jiski wajah se OTP aik hii baar jaaraha hai 2sri baar me OTP has already been used
+        // $otp->is_used = 1;
+        // $otp->save();
 
         // Resend the new OTP email to the corresponding email address
         try {
             Mail::to($newOtp->email)->send(new \App\Mail\OtpVerification($newOtpCode));
-            return response()->json(['status' => 'success', 'message' => 'New OTP has been resent to the email address.']);
+            return response()->json(['status_code'=>Response::HTTP_OK, 'message' => 'New OTP has been resent to the email address.']);
         } catch (\Exception $e) {
-            return response()->json(['status' => 'failure', 'message' => 'Failed to resend OTP.']);
+            return response()->json(['status_code'=>Response::HTTP_INTERNAL_SERVER_ERROR, 'message' => 'Failed to resend OTP.']);
         }
     }
 
@@ -129,22 +139,25 @@ class AuthController extends Controller
         // Validate the incoming request data
         $validator = Validator::make($request->all(), [
             'otp_code' => 'required|string',
+            'email' => 'required|email'
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['status' => 'failure', 'message' => $validator->errors()->first()]);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => $validator->errors()->first()]);
         }
 
         $otpCode = $request->otp_code;
+        $email = $request->email;
 
         // Retrieve the OTP record from the database based on the provided OTP code
         $otp = Otp::where('code', $otpCode)
+            ->where('email', $email) // Add email condition
             ->where('status', 1) // Assuming 1 means active
             ->where('is_used', 0) // Assuming 0 means not used
             ->first();
 
         if (!$otp) {
-            return response()->json(['status' => 'failure', 'message' => 'Invalid OTP']);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => 'Invalid OTP']);
         }
 
         // Check if the OTP code has expired
@@ -153,7 +166,7 @@ class AuthController extends Controller
             // Mark OTP as expired
             $otp->status = 0; // 0 means expired
             $otp->save();
-            return response()->json(['status' => 'failure', 'message' => 'OTP code has expired. Please generate a new one.']);
+            return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => 'OTP code has expired. Please generate a new one.']);
         }
 
         // Retrieve the email associated with the OTP
@@ -162,6 +175,10 @@ class AuthController extends Controller
 
         // Retrieve the user data from the UserTemp table
         $userTemp = UserTemp::where('email', $email)->first();
+
+        if (!$userTemp) {
+            return response()->json(['status_code'=>Response::HTTP_NOT_FOUND, 'message' => 'User not found']);
+        }
 
         // Store the password before deleting the UserTemp object
          $rawPassword = $userTemp->password;

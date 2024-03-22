@@ -27,7 +27,7 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return response()->json(['status_code'=>Response::HTTP_BAD_REQUEST, 'message' => $validator->errors()->first()]);
         }
-        
+
         $email = $request->email;
         $password = $request->password;
 
@@ -85,7 +85,7 @@ class AuthController extends Controller
             return response()->json(['status' => 'failure', 'message' => $validator->errors()->first()]);
         }
 
-        // Find the OTP record matching the provided UUID
+
         $otp = Otp::where('UUID', $request->UUID)->first();
 
         // If no matching OTP record is found, return failure response
@@ -201,7 +201,9 @@ class AuthController extends Controller
 
                 // Proceed with the login process or return a success response
                 // I don't need to only send business_id as Maaz can access the business_id from the whole user table's object which I'm sending in the request.
-                return $this->login($request);
+                // return $this->login($request);
+                return response()->json(['status_code'=>Response::HTTP_OK, 'message' => 'User registered successfully']);
+
             }
         } catch (\Exception $e) {
             return response()->json(['status' => 'failure', 'message' => 'Error registering user: ' . $e->getMessage()]);
@@ -220,21 +222,28 @@ class AuthController extends Controller
 
     public function validateTheIncomingRequestData(Request $request, $userType): \Illuminate\Http\JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255', // Maximum length of 255 characters
-            'email' => 'required|email|max:100|unique:users', // Maximum length of 100 characters
-            'password' => 'required|string|max:255|min:6', // Maximum length of 255 characters
-            'phone' => 'required|string|max:100|unique:users', // Maximum length of 100 characters
-            // 'date_of_birth' => 'required|date',
-            // 'status' => 'required|integer',
-            //'user_type_id' => 'required|integer',
-            'category_id' => 'required|integer',
-            // 'business_id' => 'required|integer',
-            // 'is_deleted' => 'required|integer',
-            // 'consent' => 'required|integer',
-            // 'verified' => 'required|integer',
-             'UUID' => 'required|integer',
-        ]);
+
+        // RegisterBusiness requires category_id not Consumer
+        if($userType == 3) {
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255', // Maximum length of 255 characters
+                'email' => 'required|email|max:100|unique:users', // Maximum length of 100 characters
+                'password' => 'required|string|max:255|min:6', // Maximum length of 255 characters
+                'phone' => 'required|string|max:100|unique:users', // Maximum length of 100 characters
+                // Only Register Business requires category_id
+                'category_id' => 'required|integer',
+                'UUID' => 'required|integer',
+            ]);
+        }
+        else {
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255', // Maximum length of 255 characters
+                'email' => 'required|email|max:100|unique:users', // Maximum length of 100 characters
+                'password' => 'required|string|max:255|min:6', // Maximum length of 255 characters
+                'phone' => 'required|string|max:100|unique:users', // Maximum length of 100 characters
+                'UUID' => 'required|integer',
+            ]);
+        }
 
         // If validation fails, return error response
         if ($validator->fails()) {
@@ -261,12 +270,12 @@ class AuthController extends Controller
         // If userType is 3 than it'll be set to business, otherwise it'll be 1 for consumer.
         if($userType == 3) {
             $userTemp->user_type_id = 3;
+            $userTemp->category_id = $request->category_id;
         }
         else {
             $userTemp->user_type_id = 1;
+            $userTemp->category_id = 0;
         }
-
-        $userTemp->category_id = $request->category_id;
         // Giving business_id as null because we don't need to give any value and the real business id will be assigned in otp_verfication. Giving null won't work.
         $userTemp->business_id = 0;
         $userTemp->is_deleted = 0;
